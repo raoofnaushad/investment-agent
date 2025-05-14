@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./server
+    ports:
+      - "8000:8000"
+    restart: always
+    container_name: adventis-server
+
+  client:
+    build: ./client
+    ports:
+      - "3000:80"
+    restart: always
+    container_name: adventis-client

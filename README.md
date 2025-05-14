@@ -1,5 +1,25 @@
 
 
+High-level AWS architecture – ECS Fargate tasks (containers) running in a VPC behind an Application Load Balancer. Images are stored in ECR, and users access the app via the ALB.
+
+
+🧱 Infrastructure Overview
+Frontend: React + TypeScript
+
+Backend: FastAPI + Python
+
+Deployment Target: AWS EC2 (Ubuntu)
+
+CI/CD: GitHub Actions
+
+Secrets Management: AWS Secrets Manager
+
+Domain: adventis.lokam.ai
+
+Containerization: Docker
+
+
+
 
 Example Prompt:
 
