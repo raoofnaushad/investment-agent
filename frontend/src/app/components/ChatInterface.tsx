@@ -1,4 +1,4 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperclip, faPaperPlane, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -23,6 +23,7 @@ interface ChatInterfaceProps {
   messages: Message[];
   onSendMessage: (message: string) => void;
   onSelectResponseOption?: (messageId: string, optionId: string) => void;
+  onReceiveMessage: (message: Message) => void; // New prop for handling received messages
 }
 
 const formatBoldText = (text: string) => {
@@ -32,17 +33,50 @@ const formatBoldText = (text: string) => {
 export default function ChatInterface({ 
   messages, 
   onSendMessage,
-  onSelectResponseOption 
+  onSelectResponseOption,
+  onReceiveMessage
 }: ChatInterfaceProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
   const chatContainerId = useId();
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/ws/agentchat');
+    setSocket(ws);
+
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    ws.onmessage = (event) => {
+      const messageContent = event.data;
+      const newMessage: Message = {
+        id: `msg-${Date.now()}`,
+        sender: 'assistant',
+        content: messageContent,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      onReceiveMessage(newMessage);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [onReceiveMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputMessage.trim()) {
       setIsLoading(true);
       onSendMessage(inputMessage);
+      if (socket) {
+        socket.send(inputMessage);
+      }
       setInputMessage('');
       
       setTimeout(() => {
@@ -70,66 +104,12 @@ export default function ChatInterface({
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {message.sender === 'user' ? (
-              <div className="max-w-[80%] rounded-lg p-4 bg-blue-600 text-white">
-                <div 
-                  className="text-sm whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: formatBoldText(message.content) }}
-                />
-              </div>
-            ) : (
-              <div className="max-w-[95%] w-full">
-                {message.responseOptions && !message.selectedOption ? (
-                  <div className="space-y-3">
-                    <div className="rounded-lg p-4 bg-[#2a2a2a] text-gray-100">
-                      <div 
-                        className="text-sm whitespace-pre-line"
-                        dangerouslySetInnerHTML={{ __html: formatBoldText(message.content) }}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                      {message.responseOptions.map((option, index) => (
-                        <div 
-                          key={option.id} 
-                          className={`rounded-lg p-4 bg-[#2a2a2a] text-gray-100 hover:bg-[#3a3a3a] cursor-pointer border border-gray-700 h-full flex flex-col transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
-                            index === 0 ? 'border-l-blue-500 border-l-4' : 
-                            index === 1 ? 'border-l-purple-500 border-l-4' : 
-                            'border-l-green-500 border-l-4'
-                          }`}
-                          onClick={() => handleSelectOption(message.id, option.id)}
-                        >
-                          <div className="flex flex-col h-full">
-                            <div 
-                              className="text-sm whitespace-pre-line flex-grow"
-                              dangerouslySetInnerHTML={{ __html: formatBoldText(option.content) }}
-                            />
-                            <div className="flex justify-end mt-3">
-                              <button 
-                                className="text-gray-400 hover:text-gray-200 bg-[#1a1a1a] hover:bg-[#333333] w-8 h-8 flex items-center justify-center rounded-full transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSelectOption(message.id, option.id);
-                                }}
-                              >
-                                <FontAwesomeIcon icon={faThumbsUp} className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-lg p-4 bg-[#2a2a2a] text-gray-100">
-                    <div 
-                      className="text-sm whitespace-pre-line"
-                      dangerouslySetInnerHTML={{ __html: formatBoldText(getMessageContent(message)) }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="max-w-full rounded-lg p-4 bg-[#2a2a2a] text-gray-100">
+              <div 
+                className="text-sm whitespace-pre-line"
+                dangerouslySetInnerHTML={{ __html: formatBoldText(getMessageContent(message)) }}
+              />
+            </div>
           </div>
         ))}
 
@@ -176,4 +156,4 @@ export default function ChatInterface({
       </div>
     </div>
   );
-} 
+}

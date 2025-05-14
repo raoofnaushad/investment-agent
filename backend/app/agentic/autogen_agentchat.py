@@ -6,11 +6,14 @@ from autogen_agentchat.teams import SelectorGroupChat
 from autogen_agentchat.ui import Console
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogenstudio.gallery.tools import google_search_tool, fetch_webpage_tool 
+from fastapi import FastAPI, WebSocket
 
 from app.config import OPENAI_MODEL
+from app.agentic.utils.message_serialize import serialize_message
 
+import json
 
-async def main() -> None:
+async def process_user_message(user_message: str, websocket: WebSocket) -> str:
     # Initialize the model client
     model_client = OpenAIChatCompletionClient(model=OPENAI_MODEL)
 
@@ -185,16 +188,18 @@ async def main() -> None:
         allow_repeated_speaker=True
     )
 
-    # Example task
-    task = """I need an investment portfolio for a client with the following profile:
-    - 45-year-old professional
-    - Income: $200,000/year
-    - Investment horizon: 20 years
-    - Risk tolerance: Moderate
-    - Goal: Retirement planning
-    Please analyze and provide a comprehensive investment proposal.""" 
+    # Use the user message as the task
+    async for message in team.run_stream(task=user_message):
+        # Convert the message to a JSON-serializable dictionary
+        print(f"Sending message: {message}")
 
-    await Console(team.run_stream(task=task))
+        msg_json = json.dumps(serialize_message(message))
+        
+        print(f"Sending processed message: {msg_json}")
+        print(f"Sending message type: {type(msg_json)}")
+        
+        # Send the JSON string over the WebSocket
+        await websocket.send_text(msg_json)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    # Send final result
+    await websocket.send_text("PROCESS COMPLETE")

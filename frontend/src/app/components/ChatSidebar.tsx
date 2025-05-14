@@ -71,47 +71,47 @@ export default function ChatSidebar({ companyName, chatHistory, onChatSelect }: 
           ) : (
             <>
               <FontAwesomeIcon icon={faPlus} className="h-5 w-5 mr-2" />
-              New Chat
+              Chat
             </>
           )}
         </button>
       </div>
 
       <div className="mt-4">
-        {!isCollapsed && (
-          <h2 className="px-4 py-2 text-gray-400 text-xs uppercase">
-            CHAT HISTORY
-          </h2>
-        )}
-      </div>
-
-      <div className="flex-grow overflow-y-auto">
+        <h2 className="px-4 py-2 text-gray-400 text-xs uppercase">
+          Agents
+        </h2>
         <ul className="space-y-1 px-2">
-          {chatHistory.map((chat) => (
-            <li key={chat.id}>
-              <button
-                onClick={() => onChatSelect(chat.id)}
-                className={`flex items-center w-full rounded-md py-2 px-2 ${
-                  chat.isActive 
-                    ? 'bg-[#2a2a2a] text-white' 
-                    : 'text-gray-300 hover:bg-[#2a2a2a]'
-                } transition-colors ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-              >
-                {isCollapsed ? (
-                  <div className="w-6 h-6 flex items-center justify-center bg-[#2a2a2a] rounded-full text-xs">
-                    {chat.title.charAt(0)}
-                  </div>
-                ) : (
-                  <>
-                    <span className="truncate">{chat.title}</span>
-                    <span className="text-xs text-gray-400">{chat.timestamp}</span>
-                  </>
-                )}
-              </button>
-            </li>
-          ))}
+          <li>
+            <button
+              className="flex items-center w-full rounded-md py-2 px-2 text-gray-300 hover:bg-[#2a2a2a] transition-colors"
+            >
+              Investment AI
+            </button>
+          </li>
         </ul>
       </div>
+
+      <div className="mt-4">
+        {!isCollapsed && (
+          <h2 className="px-4 py-2 text-gray-400 text-xs uppercase">
+            Chats
+          </h2>
+        )}
+        <ul className="space-y-1 px-2">
+          <li>
+            <button
+              onClick={() => onChatSelect('1')}
+              className="flex items-center w-full rounded-md py-2 px-2 text-gray-300 hover:bg-[#2a2a2a] transition-colors"
+            >
+              About Lokam AI
+            </button>
+          </li>
+        </ul>
+      </div>
+
+
+
     </div>
   );
 } 
