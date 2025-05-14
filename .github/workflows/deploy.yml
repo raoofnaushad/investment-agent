@@ -1,26 +1,38 @@
-- name: Checkout code
-  uses: actions/checkout@v3
+name: Deploy to EC2
 
-- name: Set up SSH agent
-  run: |
-    mkdir -p ~/.ssh
-    echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' | ssh-add -
-    ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+on:
+  push:
+    branches:
+      - main
 
-- name: Deploy to EC2
-  run: |
-    ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-      cd /home/ubuntu/opsara
-      git pull origin main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      # Inject frontend env
-      echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > client/.env
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Inject backend env
-      echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > server/.env
-      echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> server/.env
-      echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> server/.env
+      - name: Set up SSH agent
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' | ssh-add -
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      docker-compose down
-      docker-compose up --build -d
-    EOF
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/opsara
+            git pull origin main
+
+            # Inject frontend env
+            echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > client/.env
+
+            # Inject backend env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > server/.env
+            echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> server/.env
+            echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> server/.env
+
+            docker-compose down
+            docker-compose up --build -d
+          EOF
