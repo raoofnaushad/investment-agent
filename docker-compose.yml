@@ -16,9 +16,10 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
+        REACT_APP_WS_URL: ${REACT_APP_WS_URL}
     ports:
       - "3000:80"
     restart: always
     container_name: adventis-client
-    env_file:
-      - .env

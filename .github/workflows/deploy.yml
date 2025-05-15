@@ -21,6 +21,8 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+
             cd /home/ubuntu/opsara/investment-agent
             git pull origin main
 
@@ -35,7 +37,10 @@ jobs:
             docker system prune -af
             docker volume prune -f
 
-            # Rebuild and restart Docker containers
-            docker-compose down
-            docker-compose up --build -d
+            # Build and deploy Docker containers with build arguments
+            REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
+            REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }} \
+            docker-compose build --build-arg REACT_APP_API_URL --build-arg REACT_APP_WS_URL
+
+            docker-compose up -d
           EOF
