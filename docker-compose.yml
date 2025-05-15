@@ -10,7 +10,7 @@ services:
     restart: always
     container_name: adventis-server
     env_file:
-      - ./server/.env
+      - .env
 
   client:
     build:
@@ -21,4 +21,4 @@ services:
     restart: always
     container_name: adventis-client
     env_file:
-      - ./client/.env
+      - .env

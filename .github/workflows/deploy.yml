@@ -24,14 +24,12 @@ jobs:
             cd /home/ubuntu/opsara/investment-agent
             git pull origin main
 
-            # Inject frontend env
-            echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > client/.env
-            echo "REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}" > client/.env
-
-            # Inject backend env
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > server/.env
-            echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> server/.env
-            echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> server/.env
+            # Inject environment variables
+            echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env
+            echo "REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+            echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> .env
 
             # Prune and clean up Docker
             docker system prune -af
