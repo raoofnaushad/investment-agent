@@ -34,7 +34,7 @@ export default function ChatInterface({ messages, onReceiveMessage }: ChatInterf
   const chatContainerId = useId();
 
   const handleSendMessage = (content: string) => {
-    if (!socket) {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       const ws = connectWebSocket(
         (messageContent) => {
           if (messageContent === "PROCESS COMPLETE") {
@@ -57,28 +57,25 @@ export default function ChatInterface({ messages, onReceiveMessage }: ChatInterf
         }
       );
       setSocket(ws);
-
+  
       ws.onopen = () => {
         console.log('WebSocket connection opened');
         setIsLoading(true);
         ws.send(content);
       };
-
+  
       ws.onclose = () => {
         console.log('WebSocket connection closed');
         setIsLoading(false);
       };
-
+  
       ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         setIsLoading(false);
       };
-    } else if (socket.readyState === WebSocket.OPEN) {
+    } else {
       setIsLoading(true);
       socket.send(content);
-    } else {
-      console.error('WebSocket is not open');
-      setIsLoading(false);
     }
   };
 

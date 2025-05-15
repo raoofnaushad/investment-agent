@@ -18,5 +18,4 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Error: {e}")  # Log the error
     finally:
-        if websocket.close_code is None:  # Check if the WebSocket is still open
-            await websocket.close()
+        await websocket.close()
