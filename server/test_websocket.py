@@ -3,7 +3,7 @@ import websockets
 import os
 
 async def test_websocket():
-    uri = "ws://https://adventis.lokam.ai/api/v1/ws/agentchat"  # Updated to match the server's WebSocket endpoint
+    uri = "wss://adventis.lokam.ai/api/v1/ws/agentchat"  # Updated to match the server's WebSocket endpoint
     async with websockets.connect(uri) as websocket:
         # Overwrite the markdown file when a new connection is created
         with open("websocket_responses.md", "w") as file:

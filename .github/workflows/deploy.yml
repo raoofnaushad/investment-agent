@@ -33,6 +33,11 @@ jobs:
             echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> server/.env
             echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> server/.env
 
+            # Prune and clean up Docker
+            docker system prune -af
+            docker volume prune -f
+
+            # Rebuild and restart Docker containers
             docker-compose down
             docker-compose up --build -d
           EOF
