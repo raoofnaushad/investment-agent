@@ -1,8 +1,8 @@
 // src/app/services/api.ts
 
 export function connectWebSocket(onMessage: (message: string) => void, onOpen?: () => void, onClose?: () => void, onError?: (error: Event) => void) {
-    // const wsUrl = process.env.REACT_APP_WS_URL || 'wss://adventis.lokam.ai/api/v1/ws/agentchat';
-    const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/api/v1/ws/agentchat';
+    const wsUrl = process.env.REACT_APP_WS_URL || 'wss://adventis.lokam.ai/api/v1/ws/agentchat';
+    // const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/api/v1/ws/agentchat';
     
     const ws = new WebSocket(wsUrl);
   
