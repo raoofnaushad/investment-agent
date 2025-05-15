@@ -2,15 +2,23 @@ version: '3.8'
 
 services:
   server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     restart: always
     container_name: adventis-server
+    env_file:
+      - ./server/.env
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     ports:
       - "3000:80"
     restart: always
     container_name: adventis-client
+    env_file:
+      - ./client/.env
