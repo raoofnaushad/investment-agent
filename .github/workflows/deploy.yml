@@ -24,6 +24,7 @@ jobs:
             set -e
 
             cd /home/ubuntu/opsara/investment-agent
+            git stash
             git pull origin main
 
             # Inject environment variables
