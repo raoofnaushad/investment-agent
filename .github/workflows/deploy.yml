@@ -20,28 +20,27 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
 
             cd /home/ubuntu/opsara/investment-agent
             git stash
             git pull origin main
 
-            # Inject environment variables
-            echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" > .env
-            echo "REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}" >> .env
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-            echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
-            echo "GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}" >> .env
+            # Create .env file with environment variables
+            cat <<EOT > .env
+REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
+REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}
+OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }}
+EOT
 
             # Prune and clean up Docker
             docker system prune -af
             docker volume prune -f
 
             # Build and deploy Docker containers with build arguments
-            REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
-            REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }} \
-            docker-compose build --build-arg REACT_APP_API_URL --build-arg REACT_APP_WS_URL
-
+            docker-compose build --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} --build-arg REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}
             docker-compose up -d
           EOF
